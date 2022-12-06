@@ -1016,6 +1016,11 @@ spec:
                       the HPA will scale up. Defaults to 90 percent.
                     format: int32
                     type: integer
+                  targetMemoryUtilization:
+                    description: TargetMemoryUtilization sets the target average memory
+                      utilization across all replicas
+                    format: int32
+                    type: integer
                 type: object
               config:
                 description: Config is the raw JSON to be used as the collector's
@@ -1195,6 +1200,11 @@ spec:
                     type: object
                   hostname:
                     description: Hostname by which the ingress proxy can be reached.
+                    type: string
+                  ingressClassName:
+                    description: IngressClassName is the name of an IngressClass cluster
+                      resource. Ingress controller implementations use this field
+                      to know whether they should be serving this Ingress resource.
                     type: string
                   tls:
                     description: TLS configuration.

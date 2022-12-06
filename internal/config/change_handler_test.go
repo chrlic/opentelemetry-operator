@@ -12,18 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package collector
+// Package config contains the operator's runtime configuration.
+package config
 
 import (
-	corev1 "k8s.io/api/core/v1"
+	"testing"
 
-	"github.com/open-telemetry/opentelemetry-operator/apis/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func getDNSPolicy(otelcol v1alpha1.OpenTelemetryCollector) corev1.DNSPolicy {
-	dnsPolicy := corev1.DNSClusterFirst
-	if otelcol.Spec.HostNetwork {
-		dnsPolicy = corev1.DNSClusterFirstWithHostNet
+func TestChangeHandler(t *testing.T) {
+	// prepare
+	internal := 0
+	callback := func() error {
+		internal += 1
+		return nil
 	}
-	return dnsPolicy
+	h := newOnChange()
+
+	h.Register(callback)
+
+	for i := 0; i < 5; i++ {
+		assert.Equal(t, i, internal)
+		require.NoError(t, h.Do())
+		assert.Equal(t, i+1, internal)
+	}
 }

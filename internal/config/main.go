@@ -35,7 +35,6 @@ const (
 // Config holds the static configuration for this operator.
 type Config struct {
 	autoDetect                     autodetect.AutoDetect
-	OnChange                       func() error
 	logger                         logr.Logger
 	targetAllocatorImage           string
 	autoInstrumentationPythonImage string
@@ -45,7 +44,7 @@ type Config struct {
 	targetAllocatorConfigMapEntry  string
 	autoInstrumentationNodeJSImage string
 	autoInstrumentationJavaImage   string
-	onChange                       []func() error
+	onPlatformChange               changeHandler
 	labelsFilter                   []string
 	platform                       platform.Platform
 	autoDetectFrequency            time.Duration
@@ -63,6 +62,7 @@ func New(opts ...Option) Config {
 		platform:                      platform.Unknown,
 		version:                       version.Get(),
 		autoscalingVersion:            autodetect.DefaultAutoscalingVersion,
+		onPlatformChange:              newOnChange(),
 	}
 	for _, opt := range opts {
 		opt(&o)
@@ -76,7 +76,7 @@ func New(opts ...Option) Config {
 		targetAllocatorImage:           o.targetAllocatorImage,
 		targetAllocatorConfigMapEntry:  o.targetAllocatorConfigMapEntry,
 		logger:                         o.logger,
-		onChange:                       o.onChange,
+		onPlatformChange:               o.onPlatformChange,
 		platform:                       o.platform,
 		autoInstrumentationJavaImage:   o.autoInstrumentationJavaImage,
 		autoInstrumentationNodeJSImage: o.autoInstrumentationNodeJSImage,
@@ -126,12 +126,9 @@ func (c *Config) AutoDetect() error {
 	}
 
 	if changed {
-		for _, callback := range c.onChange {
-			if err := callback(); err != nil {
-				// we don't fail if the callback failed, as the auto-detection itself
-				// did work
-				c.logger.Error(err, "configuration change notification failed for callback")
-			}
+		if err := c.onPlatformChange.Do(); err != nil {
+			// Don't fail if the callback failed, as auto-detection itself worked.
+			c.logger.Error(err, "configuration change notification failed for callback")
 		}
 	}
 
@@ -198,4 +195,10 @@ func (c *Config) AutoInstrumentationDotNetImage() string {
 // Returns the filters converted to regex strings used to filter out unwanted labels from propagations.
 func (c *Config) LabelsFilter() []string {
 	return c.labelsFilter
+}
+
+// RegisterPlatformChangeCallback registers the given function as a callback that
+// is called when the platform detection detects a change.
+func (c *Config) RegisterPlatformChangeCallback(f func() error) {
+	c.onPlatformChange.Register(f)
 }

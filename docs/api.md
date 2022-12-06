@@ -3228,6 +3228,15 @@ Autoscaler specifies the pod autoscaling configuration to use for the OpenTeleme
             <i>Format</i>: int32<br/>
         </td>
         <td>false</td>
+      </tr><tr>
+        <td><b>targetMemoryUtilization</b></td>
+        <td>integer</td>
+        <td>
+          TargetMemoryUtilization sets the target average memory utilization across all replicas<br/>
+          <br/>
+            <i>Format</i>: int32<br/>
+        </td>
+        <td>false</td>
       </tr></tbody>
 </table>
 
@@ -3825,6 +3834,13 @@ Ingress is used to specify how OpenTelemetry Collector is exposed. This function
         <td>string</td>
         <td>
           Hostname by which the ingress proxy can be reached.<br/>
+        </td>
+        <td>false</td>
+      </tr><tr>
+        <td><b>ingressClassName</b></td>
+        <td>string</td>
+        <td>
+          IngressClassName is the name of an IngressClass cluster resource. Ingress controller implementations use this field to know whether they should be serving this Ingress resource.<br/>
         </td>
         <td>false</td>
       </tr><tr>
