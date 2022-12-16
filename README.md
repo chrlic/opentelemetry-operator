@@ -228,10 +228,7 @@ instrumentation.opentelemetry.io/inject-dotnet: "true"
 Apache HTTPD:
 ```bash
 instrumentation.opentelemetry.io/inject-apache-httpd: "true"
-```
-and optionally OTEL_NAMESPACE is needed in trading attributes
-```bash
-instrumentation.opentelemetry.io/otel-namespace: "true"
+instrumentation.opentelemetry.io/otel-namespace: "my-custom-namespace" # optional, if missing, OTEL_NAMESPACE will be set to pod namespace 
 ```
 
 
@@ -310,7 +307,9 @@ spec:
 The Dockerfiles for auto-instrumentation can be found in [autoinstrumentation directory](./autoinstrumentation).
 Follow the instructions in the Dockerfiles on how to build a custom container image.
 
->**Note:** For `Apache HTTPD` auto-instrumentation, by default, instrumentation assumes httpd version 2.4 and httpd configuration directory /usr/local/apache2/conf as in default Apache HTTPD image. If you need to use version 2.2, or your HTTPD configuration is different, and or you need to adjust agent parameters, adjust instrumentation per following example:
+#### Using Apache HTTPD autoinstrumentation
+
+For `Apache HTTPD` autoinstrumentation, by default, instrumentation assumes httpd version 2.4 and httpd configuration directory /usr/local/apache2/conf as it is in the official Apache HTTPD image (f.e. docker.io/httpd:latest). If you need to use version 2.2, or your HTTPD configuration directory is different, and or you need to adjust agent attributes, customize the instrumentation specification per following example:
 ```yaml
 apiVersion: opentelemetry.io/v1alpha1
 kind: Instrumentation
@@ -326,7 +325,8 @@ metadata:
     - name: ...
       value: ...
 ```
-List of all attributes can be found at [otel-webserver-module](https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/otel-webserver-module)
+List of all available attributes can be found at [otel-webserver-module](https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/otel-webserver-module)
+
 
 #### Inject OpenTelemetry SDK environment variables only
 
