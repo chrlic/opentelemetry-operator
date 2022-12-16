@@ -176,7 +176,7 @@ When using sidecar mode the OpenTelemetry collector container will have the envi
 
 ### OpenTelemetry auto-instrumentation injection
 
-The operator can inject and configure OpenTelemetry auto-instrumentation libraries. Currently DotNet, Java, NodeJS and Python are supported.
+The operator can inject and configure OpenTelemetry auto-instrumentation libraries. Currently DotNet, Java, NodeJS, Python and Apache HTTPD are supported.
 
 To use auto-instrumentation, configure an `Instrumentation` resource with the configuration for the SDK and instrumentation.
 
@@ -224,6 +224,16 @@ DotNet:
 ```bash
 instrumentation.opentelemetry.io/inject-dotnet: "true"
 ```
+
+Apache HTTPD:
+```bash
+instrumentation.opentelemetry.io/inject-apache-httpd: "true"
+```
+and optionally OTEL_NAMESPACE is needed in trading attributes
+```bash
+instrumentation.opentelemetry.io/otel-namespace: "true"
+```
+
 
 OpenTelemetry SDK environment variables only:
 ```bash
@@ -293,10 +303,30 @@ spec:
     image: your-customized-auto-instrumentation-image:python
   dotnet:
     image: your-customized-auto-instrumentation-image:dotnet
+  apacheHttpd:
+    image: your-customized-auto-instrumentation-image:apache-httpd
 ```
 
 The Dockerfiles for auto-instrumentation can be found in [autoinstrumentation directory](./autoinstrumentation).
 Follow the instructions in the Dockerfiles on how to build a custom container image.
+
+>**Note:** For `Apache HTTPD` auto-instrumentation, by default, instrumentation assumes httpd version 2.4 and httpd configuration directory /usr/local/apache2/conf as in default Apache HTTPD image. If you need to use version 2.2, or your HTTPD configuration is different, and or you need to adjust agent parameters, adjust instrumentation per following example:
+```yaml
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+  apache:
+    image: your-customized-auto-instrumentation-image:apache-httpd
+    version: 2.2
+    configPath: /your-custom-config-path
+    attrs:
+    - name: ApacheModuleOtelMaxQueueSize
+      value: "4096"
+    - name: ...
+      value: ...
+```
+List of all attributes can be found at [otel-webserver-module](https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/otel-webserver-module)
 
 #### Inject OpenTelemetry SDK environment variables only
 
